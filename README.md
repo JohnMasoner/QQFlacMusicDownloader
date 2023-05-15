@@ -61,6 +61,16 @@ IDE: Windows Notepad
 1. Windows用户可能体验不是很好，因为很多适配坑。
 2. QQ音乐搜不到,是因为搜索频率过快。别问我为什么才搜两次就频繁了，你问qq。
 3. 下载歌曲后前端页面没有提示，看命令行窗口就知道有没有下载成功了。
+4. 昨天碰到有人因为MIME严格模式导致无法正常加载js文件，最终页面打开空白的bug，这里声明一下：垃圾Windows是这样的。解决办法如下：
+   报错信息类似于：
+   ![image](https://user-images.githubusercontent.com/24793281/235321487-6593d996-a616-4236-ae1f-4fa10211671e.png)
+   
+   给后面用Windows碰到一样报错问题的同学解决方法：
+   flak框架下运行仍然报错，这是因为加载xxx.js文件默认为text/plain格式，不能正常解析，解决方法如下图所示，修改注册表即可，将图中Content Type由原来的text/plain改为 application/javascript，然后重新打开项目即可：
+   ![image](https://user-images.githubusercontent.com/24793281/235321358-2888adb3-d571-48e0-88fc-a2836211232d.png)
+
+   另外再次赞美windows的天才设计
+
 
 ## 关于网易云登录功能的声明:
 
@@ -87,9 +97,11 @@ IDE: Windows Notepad
 ![img.png](img.png)
 
 或者通过Google风格的注释附加在函数注释上:
+
 ![img_4.png](img_4.png)
 
 或者通过IDE配置自动更新你的版权信息:
+
 ![img_5.png](img_5.png)
 
 ## 特别功能
@@ -236,10 +248,13 @@ python MainServer.py
 取消网易云自动/手动匹配的错误歌曲信息。有时候我们上传的歌曲信息网易云会识别错误，所以我们可以取消匹配或者手动更新。
 
 ![img_12.png](img_12.png)
+
 ![img_13.png](img_13.png)
 
 歌曲ID如何获得？
+
 ![img_14.png](img_14.png)
+
 ![img_15.png](img_15.png)
 
 ### Docker镜像部署
@@ -257,9 +272,53 @@ docker pull registry.cn-hangzhou.aliyuncs.com/music_downloader/qq_flac_music_dow
 ```
 
 Docker 镜像部署需要进行端口映射，可以采用以下命令进行端口映射：
+
+（注意：用你的本地使用目录替换下方“本地目录” 如 E:\music）
 ```bash
-docker run -p 127.0.0.1:8899:8899 -it dockerimage:latest
+docker run -p 127.0.0.1:8899:8899 -v 本地目录:/workspace/music -it dockerimage:latest 
 ```
+
+更新方式：先运行 ```docker ps -a ```查看容器名称
+
+然后
+```
+docker stop 容器名称
+docker rm 容器名称
+```
+
+最后，上面```docker pull```和```docker run```的代码重新执行一遍
+
+
+
+docker-compose部署方式
+
+本地新建txt，重命名为docker-compose.yml （不会修改后缀请百度）
+
+复制以下内容，同样注意替换“本地目录”
+
+或者你直接下载项目中的docker-compose.yml，然后自行修改本地目录
+```
+version: "3"
+services:
+  downloader:
+    image: registry.cn-hangzhou.aliyuncs.com/music_downloader/qq_flac_music_downloader
+    container_name: music
+    network_mode: bridge
+    volumes:
+      - 本地目录:/workspace/music
+    ports:
+      - "127.0.0.1:8899:8899"
+    restart: always 
+```
+
+然后 打开cmd命令行,cd到docker-compose.yml所在目录  ```docker-compose up -d```
+
+需要更新的时候，也是cd到docker-compose.yml所在目录
+```
+docker-compose pull
+docker-compose up -d
+```
+相对docker，更新比较简单，所以个人比较推荐使用docker-compose的方式
 
 # 免责声明
 
